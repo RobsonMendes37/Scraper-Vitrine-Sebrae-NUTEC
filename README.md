@@ -1,53 +1,61 @@
-Web Scraper Vitrine Sebrae Startups
-📊 Sobre o Projeto
+# Web Scraper — Vitrine Sebrae Startups
 
-Este projeto é um Web Scraper desenvolvido para extrair dados estruturados de todas as startups cadastradas na plataforma Vitrine Sebrae Startups.
+Script em Python para extração, validação e exportação de dados da plataforma Vitrine Sebrae Startups. O fluxo extrai os registros das empresas cadastradas, filtra a integridade dos dados e salva os resultados no Google Drive e Google Sheets.
 
-Objetivo: Automatizar a coleta, validação e armazenamento de dados das startups, exportando-os diretamente para o Google Drive e planilhas dinâmicas no Google Sheets.
-🚀 Funcionalidades
+## Funcionalidades
 
-    Extração Concorrente: Utiliza múltiplas threads (ThreadPoolExecutor) para uma raspagem de dados rápida e eficiente, processando mais de 1.000 páginas e 13.000+ startups em minutos.
-    Sincronização na Nuvem: Integração nativa com a API do Google Drive e Google Sheets para salvar backups CSV e alimentar dashboards automaticamente.
-    Tratamento de Dados Inteligente: Valida as informações extraídas e as separa automaticamente em dados completos, válidos e incompletos.
-    Geração de Relatórios: Cria um relatório relatorio.txt formatado e visual detalhando os resultados da coleta, taxas de erro e campos faltantes.
-    Tolerância a Falhas: Sistema automático de repetição (retries) e tratamento de erros de servidor para garantir estabilidade durante longas execuções.
+- **Coleta Concorrente:** Utiliza `ThreadPoolExecutor` para acelerar a paginação e a raspagem de dados (+1.000 páginas e +13.000 registros).
+- **Validação de Registros:** Classifica as startups entre dados válidos (com canais de contato ativos) e dados incompletos.
+- **Exportação para Nuvem:** Integração com APIs do Google Workspace (`gspread` e Google Drive API) para geração de planilhas e backups em CSV.
+- **Log de Execução:** Geração de arquivo `relatorio.txt` com métricas de completude, contagem de registros e erros de requisição.
+- **Resiliência:** Tratamento de timeouts, erros de conexão HTTP e retries automáticos.
 
-📦 Dados Extraídos
+<img width="914" height="502" alt="Execução do Scraper" src="https://github.com/user-attachments/assets/c83dddb5-d889-4096-bc21-ac6495a858b5" />
 
-Os seguintes campos são coletados de cada startup:
+## Esquema dos Dados Coletados
 
-    name (Nome da empresa)
-    type (Startup ou Projeto Inovador)
-    city / state (Localização)
-    siteUrl (Website oficial)
-    email (E-mail de contato)
-    phone (Telefone de contato)
-    maturity_pt (Estágio de maturidade)
-    segment_pt (Segmento/Categoria)
-    description_pt (Descrição completa)
-    imageUrl (URL da logomarca)
+| Campo | Tipo | Descrição |
+| :--- | :--- | :--- |
+| `name` | String | Nome cadastrado da empresa ou projeto |
+| `type` | String | Categoria (`Startup` ou `Projeto Inovador`) |
+| `city` / `state` | String | Município e Estado (UF) |
+| `siteUrl` | String | URL do site oficial |
+| `email` | String | E-mail de contato cadastrado |
+| `phone` | String | Telefone de contato |
+| `maturity_pt` | String | Fase de maturidade do negócio |
+| `segment_pt` | String | Setor/mercado de atuação |
+| `description_pt`| Text | Descrição do modelo de negócio |
+| `imageUrl` | String | Link da imagem/logotipo |
 
-📁 Arquivos Gerados
+<img width="1733" height="1024" alt="Visualização dos Dados" src="https://github.com/user-attachments/assets/c22b2c3c-48f7-4486-b076-6da7e76968b3" />
 
-Ao final da execução, o script salva os seguintes arquivos na pasta destino do Google Drive:
+## Estrutura dos Arquivos de Saída
 
-    COMPLETO.csv: Todas as startups raspadas no processo.
-    DADOS_VALIDOS.csv: Startups que contêm pelo menos um canal de contato e nome válido.
-    DADOS_INVALIDOS.csv: Startups com dados essenciais faltando.
-    relatorio.txt: Relatório em formato de texto (histórico mantido).
-    ERROS.csv: (Opcional) Gerado apenas se houver falhas críticas de requisição.
-    Planilha Google (Dashboard_Startups_Sebrae): Planilha sincronizada e atualizada em tempo real.
+Os arquivos gerados são armazenados na pasta configurada no Google Drive:
 
-🛠️ Como Utilizar no Google Colab
+- `COMPLETO.csv`: Todos os registros capturados na execução.
+- `DADOS_VALIDOS.csv`: Registros que possuem nome e pelo menos um meio de contato (site, e-mail ou telefone).
+- `DADOS_INVALIDOS.csv`: Registros sem os campos essenciais de contato.
+- `Dashboard_Startups_Sebrae`: Planilha Google sincronizada com os dados válidos.
+- `relatorio.txt`: Log com total de registros processados, campos ausentes e status final.
+- `ERROS.csv`: (Opcional) Log de requisições que atingiram o limite de tentativas sem sucesso.
 
-    Instalação de Dependências (Célula 1): Execute para instalar e carregar as bibliotecas (Pandas, Requests, Gspread, etc).
-    Autenticação (Célula 2): Faça login com sua conta do Google para liberar o acesso de escrita no Google Drive e Google Sheets. Configure a variável CLIENTE_FOLDER_ID para a pasta desejada.
-    Carregar as Funções (Células 3 e 4): Execute as células contendo os métodos auxiliares e a classe base do scraper SebraeScraper.
-    Iniciar Coleta (Célula 5): Defina o número de páginas ou deixe end_page=None para raspar a vitrine inteira.
-    Salvar Dados (Célula 6): Dispara a exportação dos CSVs, geração do relatório .txt e a sincronização com o Google Sheets.
-    Prévia (Célula 7): Célula opcional para visualizar os dataframes gerados diretamente na interface do Colab.
+## Execução no Google Colab
 
+1. **Dependências (Célula 1):** Instale e carregue as bibliotecas necessárias (`pandas`, `requests`, `gspread`).
+2. **Autenticação (Célula 2):** Realize o login na conta Google e defina o identificador da pasta de destino:
+   ```python
+   CLIENTE_FOLDER_ID = "SEU_ID_DE_PASTA_NO_DRIVE"
+   ```
+3. **Instanciação (Células 3 e 4):** Execute os métodos auxiliares e a classe `SebraeScraper`.
+4. **Coleta (Célula 5):** Defina o intervalo de páginas desejado ou utilize `end_page=None` para varrer todas as páginas:
+   ```python
+   scraper.run(start_page=1, end_page=None)
+   ```
+5. **Persistência (Célula 6):** Exporte os arquivos CSV, gere o `relatorio.txt` e sincronize com o Google Sheets.
+6. **Prévia (Célula 7):** Opcionalmente, visualize os DataFrames gerados diretamente no notebook.
 
-<img width="1733" height="1024" alt="image" src="https://github.com/user-attachments/assets/c22b2c3c-48f7-4486-b076-6da7e76968b3" />
+## Requisitos
 
-
+- Python 3.8+
+- Bibliotecas: `requests`, `pandas`, `gspread`, `google-auth`
